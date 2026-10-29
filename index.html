@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LentiVa Quest">
+<meta name="theme-color" content="#0f0c1d">
+<title>LentiVa Quest — Пирамида Маслоу</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon.svg">
+<style>
+:root{--bg:#0f0c1d;--card:#1a1630;--card2:#241e42;--text:#ece7ff;--muted:#9a93b8;--gold:#f5b942;--green:#4ade80;--red:#f87171;--blue:#60a5fa;--purple:#a78bfa;--lock:#4b4668}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100%}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#0f0c1d 70%,rgba(15,12,29,0));padding:calc(12px + env(safe-area-inset-top)) 16px 10px}
+h1{margin:0;font-size:20px;letter-spacing:.5px}
+h1 span{color:var(--gold)}
+.sub{font-size:12px;color:var(--muted);margin-top:2px}
+.xpbar{margin-top:10px;background:#000;border-radius:999px;height:14px;overflow:hidden;border:1px solid #2d2750;position:relative}
+.xpbar>div{height:100%;background:linear-gradient(90deg,#f5b942,#ff7a45);transition:width .5s;box-shadow:0 0 12px #f5b94288}
+.xpbar small{position:absolute;inset:0;text-align:center;font-size:10px;line-height:12px;color:#fff;font-weight:700;text-shadow:0 1px 2px #000}
+.rank{display:flex;justify-content:space-between;font-size:12px;margin-top:4px;color:var(--muted)}
+.rank b{color:var(--gold)}
+main{padding:0 16px}
+.page{display:none}.page.active{display:block}
+.path{position:relative;padding:10px 0 20px}
+.path:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:6px;margin-left:-3px;background:repeating-linear-gradient(180deg,#3a3360 0 14px,transparent 14px 24px);border-radius:3px}
+.node{position:relative;display:flex;align-items:center;gap:12px;margin:18px 0;cursor:pointer}
+.node:nth-child(odd){flex-direction:row-reverse}
+.node .orb{width:74px;height:74px;border-radius:50%;flex:0 0 74px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--card2);border:3px solid var(--lock);font-size:26px;position:relative;z-index:1;transition:.3s}
+.node.unlocked .orb{border-color:var(--blue);box-shadow:0 0 16px #60a5fa66}
+.node.done .orb{border-color:var(--green);box-shadow:0 0 20px #4ade8088;background:#163a2a}
+.node.current .orb{border-color:var(--gold);box-shadow:0 0 24px #f5b942aa;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.orb small{font-size:10px;color:var(--muted);margin-top:2px}
+.node .info{flex:1;background:var(--card);border-radius:14px;padding:10px 12px;border:1px solid #2a2449}
+.node:nth-child(odd) .info{text-align:right}
+.info b{display:block;font-size:14px}
+.info .t{font-size:11px;color:var(--muted);margin:2px 0 6px}
+.mini{height:8px;background:#000;border-radius:99px;overflow:hidden}
+.mini>div{height:100%;background:var(--blue);transition:width .4s}
+.node.done .mini>div{background:var(--green)}
+.node.locked .info{opacity:.55}
+.lock{font-size:11px;color:var(--red)}
+.card{background:var(--card);border:1px solid #2a2449;border-radius:16px;padding:14px;margin:12px 0}
+.card h2{margin:0 0 4px;font-size:18px}
+.card h3{margin:14px 0 6px;font-size:14px;color:var(--gold)}
+.goal{font-size:13px;color:var(--muted);line-height:1.45}
+.task{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #2a2449}
+.task:last-child{border-bottom:0}
+.task input{appearance:none;-webkit-appearance:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--purple);flex:0 0 24px;margin-top:1px;position:relative;background:#0f0c1d}
+.task input:checked{background:var(--green);border-color:var(--green)}
+.task input:checked:after{content:"✓";position:absolute;inset:0;text-align:center;line-height:20px;color:#0f0c1d;font-weight:900}
+.task label{flex:1;font-size:14px;line-height:1.35}
+.task.done label{text-decoration:line-through;color:var(--muted)}
+.task .xp{font-size:11px;color:var(--gold);white-space:nowrap;font-weight:700}
+.back{background:none;border:1px solid #3a3360;color:var(--text);border-radius:10px;padding:8px 12px;font-size:13px;margin-top:10px}
+textarea{width:100%;min-height:70px;background:#0f0c1d;color:var(--text);border:1px solid #3a3360;border-radius:10px;padding:8px;font:inherit;font-size:13px;resize:vertical}
+.tip{background:#2a2449;border-left:3px solid var(--gold);padding:8px 10px;border-radius:8px;font-size:13px;line-height:1.45;margin:8px 0}
+.streak{display:flex;gap:10px;align-items:center;font-size:14px}
+.streak b{font-size:28px;color:var(--gold)}
+.week{display:flex;gap:6px;margin-top:10px}
+.week div{flex:1;height:34px;border-radius:8px;background:#0f0c1d;border:1px solid #2a2449;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted)}
+.week div.on{background:#163a2a;border-color:var(--green);color:var(--green)}
+.week div.today{border-color:var(--gold)}
+details{background:var(--card);border:1px solid #2a2449;border-radius:14px;margin:10px 0;padding:0 14px}
+summary{padding:12px 0;font-weight:600;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"＋";color:var(--gold)}
+details[open] summary:after{content:"－"}
+details .body{padding:0 0 14px;font-size:13px;line-height:1.5;color:#d6d0f0}
+details ul,details ol{padding-left:18px;margin:6px 0}
+details li{margin:3px 0}
+nav{position:fixed;left:0;right:0;bottom:0;background:#0f0c1dee;backdrop-filter:blur(10px);border-top:1px solid #2a2449;display:flex;padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:0;color:var(--muted);font-size:11px;padding:4px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+nav button span{font-size:22px}
+nav button.active{color:var(--gold)}
+.btn{background:var(--gold);color:#0f0c1d;border:0;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;cursor:pointer}
+.btn.ghost{background:#2a2449;color:var(--text)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);background:#1a1630;border:2px solid var(--gold);border-radius:20px;padding:24px 30px;text-align:center;z-index:99;opacity:0;pointer-events:none;transition:.3s;box-shadow:0 0 60px #f5b94288}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.toast b{display:block;font-size:22px;color:var(--gold)}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.badge{background:#0f0c1d;border:1px solid #2a2449;border-radius:10px;padding:8px 10px;font-size:12px;display:flex;gap:6px;align-items:center;opacity:.4}
+.badge.got{opacity:1;border-color:var(--gold)}
+#installbar{display:none;background:#163a2a;border:1px solid var(--green);border-radius:12px;padding:10px 12px;font-size:13px;margin:10px 0;line-height:1.4}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎮 LentiVa <span>Quest</span></h1>
+  <div class="sub">Пирамида Маслоу → фриланс-художник на удалёнке</div>
+  <div class="xpbar"><div id="xpfill"></div><small id="xptext"></small></div>
+  <div class="rank"><span>Ранг: <b id="rank"></b></span><span id="xpnum"></span></div>
+</header>
+
+<main>
+<section class="page active" id="page-map">
+  <div id="installbar"></div>
+  <div class="path" id="path"></div>
+  <div class="card">
+    <h3 style="margin-top:0">🏅 Ачивки</h3>
+    <div class="badges" id="badges"></div>
+  </div>
+</section>
+
+<section class="page" id="page-level"></section>
+
+<section class="page" id="page-daily">
+  <div class="card">
+    <div class="streak">🔥 <b id="streak">0</b><div>дней подряд<br><span style="font-size:11px;color:var(--muted)">день засчитан, если выполнено ≥3 ежедневки</span></div></div>
+    <div class="week" id="week"></div>
+  </div>
+  <div class="card">
+    <h2>Ежедневные квесты</h2>
+    <div class="goal">Сбрасываются каждый день. Это фундамент пирамиды (уровень 1–2) — без него верхние этажи шатаются.</div>
+    <div id="daily"></div>
+  </div>
+</section>
+
+<section class="page" id="page-guide">
+  <div class="card" style="margin-top:12px">
+    <h2>📖 Мини-справочник</h2>
+    <div class="goal">Твоя цель: рисовать + стабильный доход. Варианты финала: (а) фриланс-художник с потоком клиентов, (б) художник + дизайнер интерьера на удалёнке.</div>
+  </div>
+  <div id="guide"></div>
+  <div class="card">
+    <h3 style="margin-top:0">💾 Прогресс</h3>
+    <div class="goal">Прогресс хранится в памяти браузера на этом устройстве. Чтобы перенести на другое — скопируй код сохранения.</div>
+    <div class="row">
+      <button class="btn" onclick="exportSave()">Скопировать сохранение</button>
+      <button class="btn ghost" onclick="importSave()">Загрузить сохранение</button>
+      <button class="btn ghost" style="color:var(--red)" onclick="resetAll()">Сбросить всё</button>
+    </div>
+  </div>
+</section>
+</main>
+
+<nav>
+  <button class="active" data-p="map"><span>🗺️</span>Карта</button>
+  <button data-p="daily"><span>🔥</span>Ежедневки</button>
+  <button data-p="guide"><span>📖</span>Справочник</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+const LEVELS=[
+ {id:1,icon:"🛏️",name:"Физиология",title:"Уровень 1 · База",
+  goal:"Сон 6–8 часов, еда, работа, рисование 10 минут в день. Тело и режим — это HP персонажа. Без них ни один скилл не качается.",
+  tasks:[
+   ["Неделю подряд ложился так, чтобы спать 6–8 часов",20],
+   ["Нормальная еда 3 раза в день (не только кофе и дошик) — неделя",15],
+   ["Рисование минимум 10 минут — 7 дней подряд",25],
+   ["Велопрогулка/тренировка 2 раза за неделю",15],
+   ["Выключаю экран за 30 минут до сна — 5 дней",10],
+   ["Месяц стабильного режима без срывов больше чем на 2 дня",40]],
+  tip:"10 минут в день важнее, чем 5 часов раз в месяц. Скетч на планшете, пока греется чайник — засчитывается."},
+ {id:2,icon:"🛡️",name:"Безопасность",title:"Уровень 2 · Тыл",
+  goal:"Работа + деньги. Смена работы на более предсказуемую и оплачиваемую. Подушка, чтобы прыжок во фриланс был не падением, а шагом.",
+  tasks:[
+   ["Посчитал реальные расходы в месяц (цифра записана)",15],
+   ["Открыл отдельный счёт/копилку под подушку",10],
+   ["Подушка 1 месяц расходов",25],
+   ["Подушка 3 месяца расходов",40],
+   ["Оформил самозанятость (Мой налог) — чтобы брать заказы легально",20],
+   ["Обновил резюме и hh.ru, посмотрел вакансии дизайнера интерьера на удалёнке",15],
+   ["Сходил минимум на 3 собеседования / откликнулся на 15 вакансий",20],
+   ["Нашёл работу стабильнее/с большей оплатой или удалёнку (если решил менять)",50],
+   ["Подушка 6 месяцев — зелёный свет на фриланс",60]],
+  tip:"Твоя работа в Строй-Альянсе сейчас — не враг, а фундамент. Пока она платит, ты качаешь уровни 3–4 без паники."},
+ {id:3,icon:"🤝",name:"Принадлежность",title:"Уровень 3 · Гильдия",
+  goal:"Чаты, встречи, постоянные команды. Художник в одиночку выгорает; в сообществе получаешь фидбек, заказы по сарафану и мотивацию.",
+  tasks:[
+   ["Вступил в 2 чата/сообщества художников (концепт-арт, CG)",15],
+   ["Выложил работу на критику и получил фидбек",15],
+   ["Сам дал развёрнутый фидбек 5 другим художникам",15],
+   ["Участвовал в челлендже (Inktober, DTIYS, арт-марафон)",25],
+   ["Сходил на офлайн-встречу / скетч-митап / лекцию в Москве",20],
+   ["Нашёл 1–2 человека для регулярного созвона/арт-бадди",25],
+   ["Поработал в команде над мини-проектом (геймджем, фан-проект, мод)",40],
+   ["Нашёл ментора или прошёл менторскую сессию",30]],
+  tip:"Геймджемы — идеальная точка входа: за 48 часов получаешь командный опыт, кейс в портфолио и знакомства с разработчиками."},
+ {id:4,icon:"⭐",name:"Уважение и признание",title:"Уровень 4 · Репутация",
+  goal:"Первые 2–5 коммишек, отзывы, повторные клиенты. Портфолио и бренд LentiVa, которые работают на тебя.",
+  tasks:[
+   ["Выбрал 1–2 ниши: стилизованный персонажный концепт-арт (+ интерьерные визы как вторая нога)",15],
+   ["Собрал 8–12 сильных работ в одной нише",40],
+   ["Оформил ArtStation/Behance + соцсети под брендом LentiVa",20],
+   ["Составил прайс и шаблон брифа/ТЗ",15],
+   ["Зарегистрировался на 2–3 биржах (Kwork, Kadrof и др.)",10],
+   ["Отправил 10 холодных писем/откликов инди-студиям или заказчикам",20],
+   ["Первая платная коммишка 🎉",50],
+   ["2–5 коммишек выполнено",50],
+   ["Получил 3 письменных отзыва",20],
+   ["Первый повторный клиент",40],
+   ["Сделал кейс/процесс-видео или пост с разбором работы",15],
+   ["Первый заказ по интерьеру на удалёнке (визуализация/концепция)",40]],
+  tip:"Портфолио показывает не всё, что ты умеешь, а то, что ты хочешь, чтобы тебе заказывали. Убери то, что не хочешь делать за деньги."},
+ {id:5,icon:"👑",name:"Самореализация",title:"Уровень 5 · Финальный босс",
+  goal:"Рисовать + деньги = стабильный доход. Ты выбираешь проекты сам, работаешь из дома (или откуда хочешь), и это не хобби, а профессия.",
+  tasks:[
+   ["Доход от рисования/удалёнки = 25% от зарплаты",40],
+   ["Доход от рисования/удалёнки = 50% от зарплаты",60],
+   ["3 месяца подряд стабильный поток заказов (2+ в месяц)",60],
+   ["Есть 2+ канала клиентов (не только одна биржа)",30],
+   ["Отказался от первого заказа, потому что он тебе не подходит",20],
+   ["Собственный авторский проект (серия работ, артбук, мир персонажей)",50],
+   ["Перешёл на фриланс / удалёнку как основной формат 🏆",100],
+   ["Уже учишь других: гайд, стрим, урок, менторство",40]],
+  tip:"Самореализация — это не точка, а состояние. Проверяй раз в месяц: иду своим путём? интересно? развиваюсь? есть смысл? Если 3 из 4 «нет» — провал где-то внизу пирамиды."}
+];
+const DAILY=[
+ ["Спал 6–8 часов","😴"],["Нормально поел","🍲"],["Рисовал ≥10 минут","✏️"],["Что-то выложил или дал фидбек","💬"],["Шаг к деньгам (отклик, письмо, отложил в подушку)","💰"],["Движение: вело / прогулка / зарядка","🚴"]
+];
+const RANKS=[[0,"Новичок"],[150,"Ученик"],[350,"Подмастерье"],[600,"Художник"],[900,"Мастер"],[1200,"Концепт-художник"],[1500,"LentiVa Legend"]];
+const BADGES=[
+ ["first","🥇 Первый шаг","Первая выполненная задача",s=>Object.keys(s.t).length>=1],
+ ["l1","🛏️ Режим","Уровень 1 закрыт",s=>lvlPct(1)===100],
+ ["l2","🛡️ Тыл прикрыт","Уровень 2 закрыт",s=>lvlPct(2)===100],
+ ["l3","🤝 В гильдии","Уровень 3 закрыт",s=>lvlPct(3)===100],
+ ["com","💸 Первая коммишка","Первый платный заказ",s=>!!s.t["4-6"]],
+ ["streak7","🔥 7 дней","Стрик ежедневок 7 дней",s=>streak()>=7],
+ ["streak30","🔥🔥 30 дней","Стрик 30 дней",s=>streak()>=30],
+ ["boss","👑 Босс повержен","Перешёл на фриланс/удалёнку",s=>!!s.t["5-6"]]
+];
+const GUIDE=[
+ ["🧭 Как читать пирамиду под твою цель",`Маслоу: к самореализации идут через закрытие потребностей снизу вверх — но нижние уровни не обязаны быть закрыты на 100%, достаточно, чтобы они не «горели». Раз в месяц проверяй провалы на уровнях 1–3: если есть — чини сначала их.<br><br>Правило конфликта: когда «хочу творить» спорит с «страшно без денег» — формулируй приоритет на период: <i>«до весны — стабильность и портфолио, с лета — переход».</i>`],
+ ["🛏️ Ур.1 — Физиология: конкретика",`<ul><li>Сон 6–8 ч. Фиксированное время отбоя важнее, чем время подъёма.</li><li>Рисование 10 мин/день — минимальная планка. Цель не результат, а привычка.</li><li>Вело 2–3 раза в неделю = разгрузка головы после 5/2.</li><li>Красный флаг: рисуешь ночью после работы до 3:00 и потом неделю не рисуешь.</li></ul>`],
+ ["🛡️ Ур.2 — Безопасность: деньги и подушка",`<ul><li>Подушка 4–6 месяцев расходов — минимальная «броня» перед фрилансом.</li><li>Самозанятость (НПД) оформляется в приложении «Мой налог» — нужна, чтобы брать заказы официально.</li><li>Промежуточный вариант — удалёнка в компании (интерьер/визуализация): нет дороги, стабильные проекты, но меньше контроля над днём.</li><li>Не строй безопасность на одной бирже: алгоритм поменяется — и поток исчезнет. Нужны свои каналы: соцсети, повторные клиенты, сарафан.</li></ul>`],
+ ["🤝 Ур.3 — Принадлежность: где искать своих",`<ul><li>Русскоязычные чаты по концепт-арту и CG в Telegram/VK, Discord-сервера арт-школ.</li><li>Челленджи: Inktober, Mermay, DTIYS, арт-марафоны школ.</li><li>Геймджемы (itch.io, Ludum Dare, локальные джемы) — командный опыт + знакомства с разработчиками.</li><li>Офлайн в Москве: скетч-встречи, лекции, выставки, арт-маркеты.</li><li>Арт-бадди: 1 человек, с которым созваниваешься раз в неделю и показываешь прогресс.</li></ul>`],
+ ["⭐ Ур.4 — Признание: путь к первым клиентам",`<ol><li>1–2 ниши: стилизованный персонажный концепт для игр + интерьерные визы/концепции как вторая нога.</li><li>8–12 работ в портфолио. Нет коммерческих — делай учебные кейсы под вымышленный бриф.</li><li>ArtStation, Behance, соцсети под брендом LentiVa. Одинаковая аватарка и ник везде.</li><li>Аудитория: инди-студии, частники, небольшие интерьерные студии, готовые работать дистанционно.</li><li>Прайс по рынку + шаблон брифа и ТЗ.</li><li>Биржи: Kwork, Kadrof, FL.ru, Behance Jobs, ArtStation Jobs. Плюс холодные письма студиям.</li><li>Доп. доходы: принты, стоки, ассеты, уроки. Твой козырь — ComfyUI: AI-мудборды и визуализации интерьеров как отдельная услуга.</li></ol>`],
+ ["👑 Ур.5 — Самореализация: вопросы на месяц",`<ul><li>Я чувствую, что иду своим путём?</li><li>Занимаюсь тем, что реально интересно?</li><li>Есть возможность учиться и пробовать новое?</li><li>Ощущаю смысл в том, что делаю?</li></ul>Если 3 из 4 «нет» — причина обычно внизу: недосып, страх за деньги, изоляция. Не «мало таланта».`],
+ ["🎨 Ориентиры по стилю",`WLOP, Sakimichan — свет, детализация, эмоция. Цель — концепт-арт и visual development для игр, от реализма до стилизации (вайб обложки Far Cry 3). Пин-ап и чувственность — да, но без 18+; не закрепляться как аниме/NSFW-художник.`],
+ ["📱 Установка как приложение",`<b>iPhone:</b> Safari → кнопка «Поделиться» → «На экран “Домой”» → «Добавить». Открывается на весь экран, работает офлайн.<br><br><b>ПК (Chrome/Edge):</b> в адресной строке справа появится значок «Установить» (монитор со стрелкой) — нажми. Или меню ⋮ → «Сохранить и поделиться» → «Установить страницу как приложение».`]
+];
+
+let S=JSON.parse(localStorage.getItem("lentiva_quest")||'{"t":{},"d":{},"n":{},"seen":{}}');
+const save=()=>localStorage.setItem("lentiva_quest",JSON.stringify(S));
+const dkey=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)};
+const today=()=>dkey(new Date());
+const lvlPct=i=>{const L=LEVELS[i-1];const d=L.tasks.filter((_,k)=>S.t[`${i}-${k}`]).length;return Math.round(d/L.tasks.length*100)};
+const totalXP=()=>LEVELS.reduce((a,L,i)=>a+L.tasks.reduce((b,t,k)=>b+(S.t[`${i+1}-${k}`]?t[1]:0),0),0);
+const maxXP=()=>LEVELS.reduce((a,L)=>a+L.tasks.reduce((b,t)=>b+t[1],0),0);
+function streak(){let n=0,d=new Date();for(let i=0;i<400;i++){const k=dkey(d);const done=(S.d[k]||[]).filter(Boolean).length;if(done>=3)n++;else if(i>0)break;d.setDate(d.getDate()-1)}return n}
+function isUnlocked(i){return i===1||lvlPct(i-1)>=50}
+
+function renderHeader(){const xp=totalXP(),mx=maxXP();const p=Math.round(xp/mx*100);
+ document.getElementById("xpfill").style.width=p+"%";document.getElementById("xptext").textContent=p+"%";
+ document.getElementById("xpnum").textContent=xp+" / "+mx+" XP";
+ let r=RANKS[0][1];for(const [x,n] of RANKS)if(xp>=x)r=n;document.getElementById("rank").textContent=r}
+
+function renderMap(){const el=document.getElementById("path");el.innerHTML="";
+ let current=LEVELS.findIndex((_,i)=>lvlPct(i+1)<100&&isUnlocked(i+1))+1;
+ [...LEVELS].reverse().forEach(L=>{const p=lvlPct(L.id);const un=isUnlocked(L.id);
+  const cls=["node",p===100?"done":"",un?"unlocked":"locked",L.id===current?"current":""].join(" ");
+  const n=document.createElement("div");n.className=cls;
+  n.innerHTML=`<div class="orb">${un?L.icon:"🔒"}<small>LVL ${L.id}</small></div>
+   <div class="info"><b>${L.name}</b><div class="t">${L.title}</div><div class="mini"><div style="width:${p}%"></div></div>
+   <div class="t">${p}% · ${L.tasks.filter((_,k)=>S.t[`${L.id}-${k}`]).length}/${L.tasks.length} задач ${!un?'<span class="lock">· открой ≥50% предыдущего</span>':''}</div></div>`;
+  n.onclick=()=>openLevel(L.id);el.appendChild(n)});
+ const b=document.getElementById("badges");b.innerHTML=BADGES.map(([id,n,d,f])=>`<div class="badge ${f(S)?'got':''}" title="${d}">${n}</div>`).join("")}
+
+function openLevel(i){const L=LEVELS[i-1];const pg=document.getElementById("page-level");const p=lvlPct(i);
+ pg.innerHTML=`<div class="card"><h2>${L.icon} ${L.title}: ${L.name}</h2><div class="goal">${L.goal}</div>
+ <div class="xpbar" style="margin-top:10px"><div style="width:${p}%"></div><small>${p}%</small></div>
+ ${!isUnlocked(i)?'<div class="tip">🔒 Уровень ещё не открыт — но отмечать можно. Рекомендуется сначала закрыть ≥50% предыдущего.</div>':''}
+ <div class="tip">💡 ${L.tip}</div>
+ <h3>Чек-лист</h3>
+ ${L.tasks.map((t,k)=>{const key=`${i}-${k}`;const d=!!S.t[key];return `<div class="task ${d?'done':''}"><input type="checkbox" id="c${key}" ${d?'checked':''} onchange="toggle('${key}',${i})"><label for="c${key}">${t[0]}</label><span class="xp">+${t[1]} XP</span></div>`}).join("")}
+ <h3>Заметки по уровню</h3>
+ <textarea placeholder="Что мешает, что сработало, идеи..." oninput="S.n[${i}]=this.value;save()">${S.n[i]||""}</textarea>
+ <div class="row"><button class="back" onclick="go('map')">← К карте</button>
+ ${i<5?`<button class="back" onclick="openLevel(${i+1})">Следующий →</button>`:""}</div></div>`;
+ showPage("level")}
+
+function toggle(key,i){const was=lvlPct(i);S.t[key]=!S.t[key];if(!S.t[key])delete S.t[key];save();
+ const now=lvlPct(i);openLevel(i);renderHeader();
+ const lvlUp=now===100&&was<100;
+ if(lvlUp){toast(`LEVEL ${i} COMPLETE!`,LEVELS[i-1].name+" закрыт 🎉");if(navigator.vibrate)navigator.vibrate([60,40,60])}
+ BADGES.forEach(([id,n,d,f])=>{if(f(S)&&!S.seen[id]){S.seen[id]=1;save();setTimeout(()=>toast("Ачивка!",n),lvlUp?1800:0)}})}
+
+function renderDaily(){const k=today();const arr=S.d[k]||[];
+ document.getElementById("daily").innerHTML=DAILY.map((d,i)=>`<div class="task ${arr[i]?'done':''}"><input type="checkbox" id="d${i}" ${arr[i]?'checked':''} onchange="tDaily(${i})"><label for="d${i}">${d[1]} ${d[0]}</label></div>`).join("");
+ document.getElementById("streak").textContent=streak();
+ const w=document.getElementById("week");w.innerHTML="";const names=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
+ for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const kk=dkey(d);const c=(S.d[kk]||[]).filter(Boolean).length;
+  w.innerHTML+=`<div class="${c>=3?'on':''} ${i===0?'today':''}">${names[d.getDay()]}<br>${c}/6</div>`}}
+function tDaily(i){const k=today();S.d[k]=S.d[k]||[];S.d[k][i]=!S.d[k][i];save();renderDaily();renderMap();
+ const c=S.d[k].filter(Boolean).length;if(c===DAILY.length)toast("Идеальный день!","Все ежедневки закрыты 🔥")}
+
+function renderGuide(){document.getElementById("guide").innerHTML=GUIDE.map(([t,b])=>`<details><summary>${t}</summary><div class="body">${b}</div></details>`).join("")}
+
+function toast(a,b){const t=document.getElementById("toast");t.innerHTML=`<b>${a}</b>${b}`;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1700)}
+function showPage(p){document.querySelectorAll(".page").forEach(e=>e.classList.remove("active"));document.getElementById("page-"+p).classList.add("active");
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.p===(p==="level"?"map":p)));window.scrollTo(0,0)}
+function go(p){if(p==="map")renderMap();if(p==="daily")renderDaily();showPage(p)}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>go(b.dataset.p));
+
+function exportSave(){const s=btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+ if(navigator.clipboard)navigator.clipboard.writeText(s).then(()=>toast("Скопировано","Вставь на другом устройстве")).catch(()=>prompt("Скопируй код:",s));else prompt("Скопируй код:",s)}
+function importSave(){const s=prompt("Вставь код сохранения:");if(!s)return;try{S=JSON.parse(decodeURIComponent(escape(atob(s.trim()))));save();renderAll();toast("Загружено","Прогресс восстановлен")}catch(e){alert("Не удалось прочитать код")}}
+function resetAll(){if(confirm("Точно сбросить весь прогресс?")){S={t:{},d:{},n:{},seen:{}};save();renderAll()}}
+function renderAll(){renderHeader();renderMap();renderDaily();renderGuide()}
+renderAll();
+
+/* PWA */
+if("serviceWorker" in navigator&&location.protocol.startsWith("http")){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+const standalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+const ib=document.getElementById("installbar");
+if(!standalone&&location.protocol.startsWith("http")){
+ const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+ ib.style.display="block";
+ ib.innerHTML=ios?"📲 Чтобы поставить как приложение: нажми <b>Поделиться</b> (квадрат со стрелкой) → <b>На экран «Домой»</b> → Добавить.":"📲 Можно установить как приложение: значок «Установить» в адресной строке или меню ⋮ → «Установить страницу как приложение».";
+}
+let deferred;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;ib.innerHTML='📲 <button class="btn" onclick="deferred.prompt()">Установить приложение</button>'});
+window.addEventListener("appinstalled",()=>{ib.style.display="none"});
+</script>
+</body>
+</html>

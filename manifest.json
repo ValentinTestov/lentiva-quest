@@ -1,0 +1,13 @@
+{
+  "name": "LentiVa Quest — Пирамида Маслоу",
+  "short_name": "LentiVa Quest",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f0c1d",
+  "theme_color": "#0f0c1d",
+  "lang": "ru",
+  "icons": [
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+  ]
+}
